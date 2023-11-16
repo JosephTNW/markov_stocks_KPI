@@ -7,7 +7,7 @@ from keras.layers import LSTM, Dense, Dropout
 import matplotlib.pyplot as plt
 
 # Read the CSV file
-df = pd.read_csv('bigblackcock.csv')
+df = pd.read_csv('teset.csv')
 
 # Select the columns of interest
 df = df[['date', 'price', 'stock_name', 'PE_ratio', 'PEG_ratio']]
@@ -19,7 +19,7 @@ df['date'] = pd.to_datetime(df['date'])
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaled_data = scaler.fit_transform(df[['price', 'PE_ratio', 'PEG_ratio']])
 
-sequence_length = 50
+sequence_length = 2
 
 # The to_sequences function is used to create sequences from the scaled data
 def to_sequences(data, seq_length):
@@ -47,9 +47,9 @@ model.add(Dense(1))
 model.compile(loss='mean_squared_error', optimizer='adam')
 
 # Fit the model
-history = model.fit(X_train, y_train, epochs=100, batch_size=32, validation_data=(X_test, y_test), verbose=1)
+history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test), verbose=1)
 
-model.save('stock_price_prediction_model50.h5')
+model.save('bnga_price_prediction_model2.h5')
 
 # Get predictions for the test set
 

@@ -5,10 +5,10 @@ from keras.models import load_model
 import matplotlib.pyplot as plt
 
 # Load the trained model (assuming it is saved as 'stock_price_prediction_model.h5')
-model = load_model('stock_price_prediction_model50.h5')
+model = load_model('bbca_price_prediction_model20_20.h5')
 
 # Load dataset B into a DataFrame
-df_B = pd.read_csv('teset.csv')
+df_B = pd.read_csv('bigblackcock.csv')
 df_B['date'] = pd.to_datetime(df_B['date'])
 
 # Normalize dataset B using the MinMaxScaler from dataset A
@@ -29,16 +29,48 @@ def to_sequences(data, seq_length):
     return np.array(x), np.array(y)
 
 # Create sequences for dataset B
-sequence_length = 50  # Same sequence length that was used for dataset A
+sequence_length = 20  # Same sequence length that was used for dataset A
 sequences_B, _ = to_sequences(scaled_data_B, sequence_length)
 
 # Make predictions using the trained model on the new dataset B sequences
 predicted_B = model.predict(sequences_B)
 
-# Invert normalization for predictions
-dummy_array_B = np.zeros(shape=(len(predicted_B), scaled_data_B.shape[1]))
-dummy_array_B[:,0] = predicted_B[:,0]  # We are only interested in the first feature (price)
-denormalized_predictions_B = scaler_B.inverse_transform(dummy_array_B)[:,0]
+def predict_sequence(model, initial_sequences, length, original_data):
+    predictions = []
+
+    # Start with the initial sequence
+    current_sequence = initial_sequences[0].copy()
+
+    for i in range(length):
+        # Reshape the sequence to match the model's input format
+        sequence_reshaped = np.array([current_sequence])
+        
+        # Predict the next step (price)
+        next_step_prediction = model.predict(sequence_reshaped)
+
+        # Append the prediction to the output list
+        predictions.append(next_step_prediction[0, 0])
+        
+        # Prepare the next sequence
+        if i < length - 1:
+            # Take the next sequence from the original data
+            next_sequence = initial_sequences[i + 1].copy()
+            # Replace its price with the predicted price
+            next_sequence[0, 0] = next_step_prediction[0, 0]
+            current_sequence = next_sequence
+
+    return np.array(predictions)
+
+# Predict a sequence of desired length
+predicted_length = len(sequences_B)  # or any other length you want
+predicted_sequence = predict_sequence(model, sequences_B, predicted_length, scaled_data_B)
+
+# Invert normalization for the predicted sequence
+dummy_array_B = np.zeros(shape=(len(predicted_sequence), scaled_data_B.shape[1]))
+dummy_array_B[:, 0] = predicted_sequence
+denormalized_predictions_B = scaler_B.inverse_transform(dummy_array_B)[:, 0]
+
+# The rest of the plotting code remains the same
 
 true_prices_B = df_B['price'].values[sequence_length:]
 
