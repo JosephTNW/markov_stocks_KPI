@@ -6,20 +6,22 @@ from keras.models import Sequential
 from keras.layers import LSTM, Dense, Dropout
 import matplotlib.pyplot as plt
 
+#controller
+epochs = 100
+sequence_length = 5
+
 # Read the CSV file
-df = pd.read_csv('teset.csv')
+df = pd.read_csv('datasetdummy.csv')
 
 # Select the columns of interest
-df = df[['date', 'price', 'stock_name', 'PE_ratio', 'PEG_ratio']]
+df = df[['date', 'price', 'stock_name', 'PE_ratio', 'PEG_ratio', 'EPS','EPS Growth']]
 
 # Convert 'date' to datetime
 df['date'] = pd.to_datetime(df['date'])
 
 # Normalize the features using MinMaxScaler (excluding 'stock_name' and 'date' columns)
 scaler = MinMaxScaler(feature_range=(0, 1))
-scaled_data = scaler.fit_transform(df[['price', 'PE_ratio', 'PEG_ratio']])
-
-sequence_length = 2
+scaled_data = scaler.fit_transform(df[['price', 'PE_ratio', 'PEG_ratio', 'EPS','EPS Growth']])
 
 # The to_sequences function is used to create sequences from the scaled data
 def to_sequences(data, seq_length):
@@ -47,9 +49,9 @@ model.add(Dense(1))
 model.compile(loss='mean_squared_error', optimizer='adam')
 
 # Fit the model
-history = model.fit(X_train, y_train, epochs=20, batch_size=32, validation_data=(X_test, y_test), verbose=1)
+history = model.fit(X_train, y_train, epochs, batch_size=32, validation_data=(X_test, y_test), verbose=1)
 
-model.save('bnga_price_prediction_model2.h5')
+model.save('dummy_price_prediction_model5.h5')
 
 # Get predictions for the test set
 
