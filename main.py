@@ -38,15 +38,16 @@ sequences, labels = to_sequences(scaled_data, sequence_length)
 X_train, X_test, y_train, y_test = train_test_split(sequences, labels, test_size=0.2, random_state=42)
 
 # Define the LSTM model
-model = Sequential()
-model.add(LSTM(50, return_sequences=True, input_shape=(sequence_length, 3)))
-model.add(Dropout(0.2))
-model.add(LSTM(50, return_sequences=False))
-model.add(Dropout(0.2))
-model.add(Dense(1))
+model = Sequential([
+    LSTM(50, return_sequences=True, input_shape=(sequence_length, 3)),
+    Dropout(0.2),
+    LSTM(50, return_sequences=False),
+    Dropout(0.2),
+    Dense(1)
+])
 
 # Compile the model using Mean Squared Error (MSE) loss function and the Adam optimizer
-model.compile(loss='mean_squared_error', optimizer='adam')
+model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 
 # Fit the model
 history = model.fit(X_train, y_train, epochs, batch_size=32, validation_data=(X_test, y_test), verbose=1)
